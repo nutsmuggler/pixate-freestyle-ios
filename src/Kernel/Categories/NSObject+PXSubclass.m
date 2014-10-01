@@ -60,7 +60,7 @@ void PXForceLoadNSObjectPXSubclass() {}
 
     // 'self' is a Pixate class, so we're checking that the object passed in is not a Pixate class
 	if (![object isKindOfClass:[self superclass]]) {
-		NSAssert(NO, @"Class %@ doesn't fit for subclassing.", [superClass description]);
+		//NSAssert(NO, @"Class %@ doesn't fit for subclassing.", [superClass description]);
 		return;
 	}
 
