@@ -61,7 +61,8 @@ void PXForceLoadNSObjectPXSubclass() {}
     // 'self' is a Pixate class, so we're checking that the object passed in is not a Pixate class
 	if (![object isKindOfClass:[self superclass]]) {
 		//NSAssert(NO, @"Class %@ doesn't fit for subclassing.", [superClass description]);
-		return;
+        NSLog(@"Class %@ doesn't fit for subclassing.", [superClass description]);
+        return;
 	}
 
     // creating the new classname by prefixing with the Pixate class name
@@ -115,7 +116,8 @@ void PXForceLoadNSObjectPXSubclass() {}
         // Check to make sure that the two classes (new and original) are the same size
         if (class_getInstanceSize(superClass) != class_getInstanceSize(newClass))
         {
-            NSAssert(NO, @"Class %@ doesn't fit for subclassing.", [superClass description]);
+            NSLog(@"Class %@ doesn't fit for subclassing.", [superClass description]);
+            //NSAssert(NO, @"Class %@ doesn't fit for subclassing.", [superClass description]);
             return;
         }
     }
