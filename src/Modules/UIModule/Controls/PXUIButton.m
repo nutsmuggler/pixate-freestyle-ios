@@ -306,7 +306,7 @@ static const char STYLE_CHILDREN;
     }
     else if (context.usesImage)
     {
-        //[self px_setBackgroundColor:[UIColor clearColor]];
+        [self px_setBackgroundColor:context.color];
         [self px_setBackgroundImage:context.backgroundImage
                            forState:[context stateFromStateNameMap:PSEUDOCLASS_MAP]];
     }
