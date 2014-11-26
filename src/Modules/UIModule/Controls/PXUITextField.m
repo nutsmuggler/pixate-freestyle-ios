@@ -105,6 +105,7 @@ static NSDictionary *PSEUDOCLASS_MAP;
     PSEUDOCLASS_MAP = @{
                         @"normal"      : UITextFieldTextDidEndEditingNotification,
                         @"highlighted" : UITextFieldTextDidBeginEditingNotification,
+                        @"disabled"    : @(UIControlStateDisabled)
                         };
 }
 
@@ -135,6 +136,11 @@ static NSDictionary *PSEUDOCLASS_MAP;
     [PXNotificationManager.sharedInstance registerObserver:self forNotification:UITextFieldTextDidEndEditingNotification withBlock:^{
         [weakSelf px_TransitionTextField:weakSelf forState:@"normal"];
     }];
+}
+
+-(void)setEnabled:(BOOL)enabled {
+    [super setEnabled:enabled];
+    [self px_TransitionTextField:self forState: enabled ? @"normal" : @"disabled"];
 }
 
 - (void)dealloc
