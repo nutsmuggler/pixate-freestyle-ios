@@ -39,7 +39,6 @@ Pod::Spec.new do |s|
   
   s.prepare_command = <<-CMD
   	lex -oPXExpressionLexer.yy.m submodules/pixate-expression-machine/src/ExpressionMachine/Parsing/PXExpressionLexer.lm
-  	touch src/DDLog.h
   CMD
 
   s.subspec 'no-arc' do |sna|
