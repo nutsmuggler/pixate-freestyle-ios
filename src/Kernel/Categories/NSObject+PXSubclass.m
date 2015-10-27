@@ -131,8 +131,12 @@ void PXForceLoadNSObjectPXSubclass() {}
 
 static BOOL respondsToSelectorIMP(id self, SEL _cmd, SEL selector)
 {
-	return ((BOOL)callSuper1v(self, [self pxClass], _cmd, selector))
-			|| (class_getInstanceMethod(object_getClass(self), selector) != NULL);
+#ifdef TARGET_OS_SIMULATOR
+    return (class_getInstanceMethod(object_getClass(self), selector) != NULL);
+#else
+    return ((BOOL)callSuper1v(self, [self pxClass], _cmd, selector))
+    || (class_getInstanceMethod(object_getClass(self), selector) != NULL);
+#endif
 }
 
 @end
