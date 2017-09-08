@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "PixateFreestyle"
-  s.version      = "2.1.4"
+  s.version      = "2.2.0"
   s.summary      = "Style your iOS app with CSS, using 100% native code and no webviews."
   s.description  = <<-DESC
                    Pixate is an iOS framework that allows you to style your application using stylesheets and a CSS-like syntax. Pixate lets you build  beautiful applications with less code and more flexibility by using familiar CSS markup to style native controls and components. Free up your team to focus on creating amazing user experiences throughout the design and development cycle.
@@ -25,30 +25,29 @@ Pod::Spec.new do |s|
              LICENSE
   }
   s.author       = { "Pixate" => "info@pixate.com" }
-  s.platform     = :ios, '5.0'
-  s.requires_arc = true  
-  non_arc_files  = 'src/Kernel/Third-Party/MAFuture/*.{h,m}'  
-  s.source   =  { :git => "https://github.com/Xaton/pixate-freestyle-ios.git", :branch => 'feature/lightweight', :submodules => true }  
-  s.source_files = 'src/*.{h,m,c}', 'src/{Core,Framework,Kernel,Modules}/**/*.{h,m,c}', 'submodules/pixate-expression-machine/src/{EMCL,ExpressionMachine}/**/*.{h,m,c}'
-  s.exclude_files = non_arc_files, 'src/pixate-freestyleTests/*', 'src/Core/Lumberjack/*', '**/*{test,tester,Tests}.{h,m}', '**/main.m'
-  s.dependency 'CocoaLumberjack', '~> 2.0.0-beta4'
+  s.platform     = :ios, '5.1'
+  s.source       = {
+        :git => "https://github.com/slavenko/pixate-freestyle-ios.git",
+        :tag => s.version.to_s
+  }
 
-#  s.prefix_header_file = "src/pixate-freestyle-Prefix.pch"
-  s.prefix_header_contents = '#define DDLEGACY YES', '#define DDLogInfo(...)', '#define DDLogVerbose(...)', '#define DDLogError(...)', '#define LOG_VERBOSE 0'
+  s.default_subspec = 'All'
+  s.subspec 'All' do |ss|
+    ss.prefix_header_file = "src/pixate-freestyle-Prefix.pch"
+    ss.source_files = 'src/PixateFreestyle.{h,m}', "src/Version.h", 'src/Core/**/*.{h,m}', 'src/Modules/**/*.{h,m}', 'src/Kernel/Categories/*.{h,m}', 'src/Kernel/Utils/*.{h,c}'
+    ss.requires_arc = true
+    ss.dependency 'PixateFreestyle/MAFuture'
+    ss.dependency 'CocoaLumberjack', '~> 2.2.0'
+  end
+
+  # This code was moved to subspec as it uses MMR while the rest of the project ARC
+  s.subspec 'MAFuture' do |ss|
+    ss.prefix_header_file = "src/pixate-freestyle-Prefix.pch"
+    ss.source_files = 'src/Kernel/Third-Party/MAFuture/*.{h,m}'
+    ss.requires_arc = false
+  end
+
   s.frameworks = 'CoreText', 'QuartzCore', 'UIKit', 'CoreGraphics'
-  
-  s.prepare_command = <<-CMD
-  	lex -oPXExpressionLexer.yy.m submodules/pixate-expression-machine/src/ExpressionMachine/Parsing/PXExpressionLexer.lm
-  CMD
+  #s.prepare_command = 'open "http://www.pixate.com/docs/framework/ios/latest/getting-started/index.html#app_setup" || true'
 
-  s.subspec 'no-arc' do |sna|
-    sna.requires_arc = false
-    sna.source_files = non_arc_files
-    sna.exclude_files = 'src/Kernel/Third-Party/MAFuture/tester.m'
-  end
-  
-  s.subspec 'lex' do |lex|
-    lex.requires_arc = false
-    lex.source_files = 'PXExpressionLexer.yy.m'
-  end
 end

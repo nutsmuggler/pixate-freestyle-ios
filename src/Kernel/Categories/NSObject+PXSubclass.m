@@ -27,6 +27,7 @@
 #import <objc/runtime.h>
 #import <objc/message.h>
 #import "objc.h"
+#include "TargetConditionals.h"
 
 static BOOL respondsToSelectorIMP(id self, SEL _cmd, SEL selector);
 
@@ -60,9 +61,8 @@ void PXForceLoadNSObjectPXSubclass() {}
 
     // 'self' is a Pixate class, so we're checking that the object passed in is not a Pixate class
 	if (![object isKindOfClass:[self superclass]]) {
-		//NSAssert(NO, @"Class %@ doesn't fit for subclassing.", [superClass description]);
-        NSLog(@"Class %@ doesn't fit for subclassing.", [superClass description]);
-        return;
+		NSAssert(NO, @"Class %@ doesn't fit for subclassing.", [superClass description]);
+		return;
 	}
 
     // creating the new classname by prefixing with the Pixate class name
@@ -116,8 +116,7 @@ void PXForceLoadNSObjectPXSubclass() {}
         // Check to make sure that the two classes (new and original) are the same size
         if (class_getInstanceSize(superClass) != class_getInstanceSize(newClass))
         {
-            NSLog(@"Class %@ doesn't fit for subclassing.", [superClass description]);
-            //NSAssert(NO, @"Class %@ doesn't fit for subclassing.", [superClass description]);
+            NSAssert(NO, @"Class %@ doesn't fit for subclassing.", [superClass description]);
             return;
         }
     }
@@ -129,14 +128,57 @@ void PXForceLoadNSObjectPXSubclass() {}
     object_setClass(object, newClass);
 }
 
+static BOOL classRespondsToSelectorRAW(Class class, SEL selector)
+{
+    if (class != Nil)
+    {
+        return class_getInstanceMethod(class, selector) != NULL;
+    }
+    return NO;
+}
+
+static BOOL respondsToSelectorRAW(id self, SEL selector)
+{
+    if (self)
+    {
+        return classRespondsToSelectorRAW(object_getClass(self), selector);
+    }
+    return NO;
+}
+
+#if (TARGET_IPHONE_SIMULATOR && TARGET_CPU_X86_64)
+
+static BOOL classHierarchyRespondsToSelector(Class class, SEL selector)
+{
+    if (class)
+    {
+        if (classRespondsToSelectorRAW(class, selector))
+        {
+            return YES;
+        }
+        else
+        {
+            return classHierarchyRespondsToSelector(class_getSuperclass(class), selector);
+        }
+    }
+
+    return NO;
+}
+
+#endif
+
 static BOOL respondsToSelectorIMP(id self, SEL _cmd, SEL selector)
 {
-#if TARGET_OS_SIMULATOR
-    return (class_getInstanceMethod(object_getClass(self), selector) != NULL);
+    // iOS 9 x64 simulators crashes with UITextFiled styling
+    // For more detail see https://github.com/Pixate/pixate-freestyle-ios/issues/186
+#if (TARGET_IPHONE_SIMULATOR && TARGET_CPU_X86_64)
+    // Use RAW implementation
+    BOOL pxClassRespondsToSelector = classHierarchyRespondsToSelector([self pxClass], selector);
 #else
-    return ((BOOL)callSuper1v(self, [self pxClass], _cmd, selector))
-    || (class_getInstanceMethod(object_getClass(self), selector) != NULL);
+    BOOL pxClassRespondsToSelector = ((BOOL)callSuper1v(self, [self pxClass], _cmd, selector));
 #endif
+
+    return pxClassRespondsToSelector || respondsToSelectorRAW(self, selector);
 }
 
 @end
